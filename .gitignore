@@ -1,0 +1,9 @@
+node_modules
+dist
+dist-ssr
+*.local
+.DS_Store
+# Ảnh gốc chưa nén (nguồn cho scripts/build-cards.mjs) — không commit
+_assets_raw
+.vscode/*
+!.vscode/extensions.json

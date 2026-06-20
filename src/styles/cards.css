@@ -1,0 +1,713 @@
+/* ============================================================
+   Lá bài tarot — mặt úp/ngửa, lật 3D, bố cục cung tròn.
+   ============================================================ */
+
+.tarot-card {
+  position: relative;
+  border-radius: var(--radius-herocards);
+  transform-style: preserve-3d;
+  transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+  user-select: none;
+}
+.tarot-card__face {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  overflow: hidden;
+}
+
+/* ----- Mặt sau (úp) ----- */
+.tarot-card__back {
+  background:
+    radial-gradient(circle at 50% 38%, rgba(255, 255, 255, 0.16), transparent 60%),
+    linear-gradient(160deg, #2f3346 0%, #20232f 60%, #1a1c26 100%);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  display: grid;
+  place-items: center;
+  box-shadow: inset 0 0 0 6px rgba(255, 255, 255, 0.04),
+    inset 0 0 30px rgba(0, 0, 0, 0.35);
+}
+.tarot-card__back-mark {
+  width: 46%;
+  height: 46%;
+  color: var(--color-slate-cyan);
+  opacity: 0.85;
+}
+
+/* ----- Mặt trước (ngửa) ----- */
+.tarot-card__front {
+  transform: rotateY(180deg);
+  background: var(--color-cream);
+  border: 1px solid var(--color-sage);
+  box-shadow: var(--shadow-subtle-2);
+}
+/* Lớp ảnh phủ kín hai mặt; nằm trên lớp SVG dự phòng. */
+.tarot-card__img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: inherit;
+  z-index: 1;
+  pointer-events: none;
+}
+.tarot-card__img.is-reversed-img {
+  transform: rotate(180deg);
+}
+/* SVG dự phòng (ẩn dưới ảnh) */
+.tarot-card.is-reversed .tarot-card__front-art {
+  transform: rotate(180deg);
+}
+.tarot-card__front-art {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: var(--color-hudson-blue);
+  z-index: 0;
+}
+.tarot-card__front-art svg {
+  width: 50%;
+  max-width: 88px;
+}
+.tarot-card__num {
+  font-family: var(--font-ppmondwest);
+  font-size: 13px;
+  color: var(--color-steel);
+  letter-spacing: 0;
+}
+.tarot-card__name {
+  font-family: var(--font-ppmondwest);
+  font-size: 15px;
+  line-height: 1.15;
+  color: var(--color-ink);
+  margin-top: 2px;
+}
+.tarot-card__dir {
+  font-size: 11px;
+  margin-top: 4px;
+  color: var(--color-slate-cyan);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+/* Trạng thái lật */
+.tarot-card.is-faceup {
+  transform: rotateY(180deg);
+}
+
+/* ============================================================
+   Màn trải bài
+   ============================================================ */
+.spread {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.spread__counter {
+  position: fixed;
+  top: var(--spacing-20);
+  right: var(--spacing-24);
+  z-index: 15;
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  background: rgba(18, 16, 28, 0.6);
+  border: 1px solid rgba(255, 220, 140, 0.28);
+  border-radius: var(--radius-nav);
+  padding: 8px 16px;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+}
+.spread__counter b {
+  font-family: var(--font-ppmondwest);
+  font-size: 20px;
+  color: #ffd86b;
+}
+.spread__counter span {
+  font-size: var(--text-caption);
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.spread__hint {
+  position: absolute;
+  top: 96px;
+  left: 50%;
+  transform: translateX(-50%);
+  text-align: center;
+  color: rgba(255, 255, 255, 0.66);
+  font-size: var(--text-body-sm);
+  z-index: 5;
+  pointer-events: none;
+  max-width: 90vw;
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.6);
+}
+.spread__hint strong {
+  color: #ffe9a8;
+  font-weight: var(--font-weight-semibold);
+}
+
+/* Vòng bài 3D — panorama trụ tròn nhìn từ TÂM (trục quay đi qua người xem) */
+.carousel {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -52%);
+  display: grid;
+  place-items: center;
+}
+.carousel__stage {
+  position: relative;
+  width: 152px;
+  height: 244px;
+  /* perspective đặt inline = RADIUS để camera nằm trên trục trụ */
+  perspective-origin: 50% 50%;
+}
+/* Giai đoạn xếp bài: con trỏ tay + bộ bài "thở" nhẹ để mời tương tác */
+.spread--deck .carousel {
+  cursor: pointer;
+}
+.spread--deck .carousel__stage {
+  animation: deck-float 3.6s ease-in-out infinite;
+}
+@keyframes deck-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-12px);
+  }
+}
+.carousel__ring {
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
+  will-change: transform;
+  /* transform (translateZ(RADIUS) + rotateY) do JS điều khiển mỗi frame */
+}
+/* Mỗi lá = một ô nền (chỉ mặt sau) → nhẹ, không có node con */
+.carousel__tile {
+  position: absolute;
+  inset: 0;
+  border-radius: var(--radius-cards);
+  background-size: cover;
+  background-position: center;
+  backface-visibility: hidden; /* ẩn khi quay ra sau → giảm overdraw */
+  -webkit-backface-visibility: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.55), 0 4px 10px rgba(0, 0, 0, 0.4);
+  /* Hiệu ứng "bay toả ra" khi tráo: lá morph từ chồng → vòng. */
+  transition: transform 0.95s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.4s ease;
+}
+/* Lá đang ở chính giữa — quầng vàng + nhịp đập báo "sẽ rút lá này" */
+.carousel__tile.is-front {
+  z-index: 2;
+  animation: front-pulse 1.9s ease-in-out infinite;
+}
+@keyframes front-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 2px rgba(255, 224, 140, 0.85),
+      0 0 22px 4px rgba(255, 200, 90, 0.45), 0 16px 44px rgba(0, 0, 0, 0.5);
+  }
+  50% {
+    box-shadow: 0 0 0 2px rgba(255, 236, 170, 1),
+      0 0 40px 12px rgba(255, 205, 100, 0.75), 0 16px 44px rgba(0, 0, 0, 0.5);
+  }
+}
+.carousel__tile.is-picked {
+  animation: card-pick 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  pointer-events: none;
+}
+@keyframes card-pick {
+  0% {
+    filter: brightness(1.6) saturate(1.2);
+    box-shadow: 0 0 50px 18px rgba(255, 215, 120, 0.9);
+    opacity: 1;
+  }
+  100% {
+    filter: brightness(2);
+    box-shadow: 0 0 80px 30px rgba(255, 220, 130, 0);
+    opacity: 0;
+  }
+}
+/* Tia sáng "chiếu rọi" xoay phía sau lá giữa */
+.carousel__rays {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 760px;
+  height: 760px;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  background: repeating-conic-gradient(
+    from 0deg,
+    rgba(255, 214, 120, 0.16) 0deg 4deg,
+    transparent 4deg 26deg
+  );
+  border-radius: 50%;
+  filter: blur(7px);
+  -webkit-mask-image: radial-gradient(circle, #000 6%, rgba(0, 0, 0, 0.6) 26%, transparent 64%);
+  mask-image: radial-gradient(circle, #000 6%, rgba(0, 0, 0, 0.6) 26%, transparent 64%);
+  mix-blend-mode: screen;
+  opacity: 0.7;
+  animation: rays-rot 42s linear infinite;
+}
+@keyframes rays-rot {
+  to {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
+}
+/* Mũi chỉ báo vị trí rút (ngay phía trên lá giữa) */
+.carousel__indicator {
+  position: absolute;
+  top: -36px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 5;
+  color: #ffd86b;
+  filter: drop-shadow(0 0 6px rgba(255, 205, 100, 0.7));
+  animation: bob 1.6s ease-in-out infinite;
+}
+@keyframes bob {
+  0%,
+  100% {
+    transform: translate(-50%, 0);
+  }
+  50% {
+    transform: translate(-50%, 5px);
+  }
+}
+
+/* Khay bài đã chọn (dưới đáy) */
+.spread__tray {
+  position: absolute;
+  bottom: var(--spacing-32);
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--spacing-16);
+  z-index: 8;
+  max-width: min(92vw, 920px);
+}
+.spread__tray.is-dense {
+  gap: 8px;
+  bottom: var(--spacing-20);
+}
+.spread__tray.is-dense .spread__tray-card {
+  width: 46px;
+  height: 74px;
+  border-radius: var(--radius-lg);
+}
+.spread__tray-slot {
+  width: 78px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+.spread__tray-card {
+  width: 78px;
+  height: 124px;
+  border-radius: var(--radius-2xl);
+  border: 1.5px dashed rgba(255, 220, 140, 0.4);
+  display: grid;
+  place-items: center;
+  color: rgba(255, 220, 140, 0.75);
+  background: rgba(18, 16, 28, 0.4);
+  transition: all 0.3s ease;
+}
+.spread__tray-card.is-filled {
+  border-style: solid;
+  border-color: transparent;
+  animation: tray-pop 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.spread__tray-card .tarot-card {
+  width: 100%;
+  height: 100%;
+}
+@keyframes tray-pop {
+  0% {
+    transform: translateY(-40px) scale(0.8);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+}
+.spread__tray-label {
+  font-size: var(--text-caption);
+  color: rgba(255, 255, 255, 0.62);
+}
+
+/* ============================================================
+   Màn kết quả (reading)
+   ============================================================ */
+.reading {
+  position: absolute;
+  inset: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 96px var(--spacing-24) var(--spacing-64);
+}
+.reading__head {
+  text-align: center;
+  max-width: 680px;
+  margin-bottom: var(--spacing-40);
+}
+.reading__head h1 {
+  font-family: var(--font-ppmondwest);
+  font-size: var(--text-heading-lg);
+  line-height: var(--leading-heading-lg);
+  letter-spacing: var(--tracking-heading-lg);
+  color: #f7f0e0;
+  text-shadow: 0 2px 20px rgba(255, 200, 100, 0.25);
+}
+.reading__head p {
+  margin-top: var(--spacing-12);
+  color: rgba(255, 255, 255, 0.66);
+  font-size: var(--text-subheading);
+}
+/* Flow (row/grid): mỗi lá kèm luận giải ngay dưới */
+.reading__flow {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(184px, 1fr));
+  gap: var(--spacing-24);
+  width: 100%;
+  max-width: 980px;
+  justify-content: center;
+}
+.reading__flow[data-count='1'] {
+  max-width: 360px;
+}
+.reading__flow[data-count='2'] {
+  max-width: 620px;
+}
+
+/* Board (cross/pentagram): bàn bài đặt theo toạ độ */
+.reading__board {
+  position: relative;
+  width: 100%;
+  max-width: 660px;
+  margin: var(--spacing-16) auto var(--spacing-32);
+  flex: none; /* không cho flexbox co lại (con tuyệt đối → cao tự nhiên = 0) */
+}
+.reading__board--cross {
+  height: 560px;
+}
+.reading__board--pentagram {
+  height: 480px;
+  max-width: 520px;
+}
+.reading__board-card {
+  position: absolute;
+  width: 78px;
+}
+.reading__board-card .tarot-card {
+  width: 78px;
+  height: 128px;
+}
+.reading__board-num {
+  position: absolute;
+  top: -8px;
+  left: -8px;
+  z-index: 3;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 11px;
+  font-weight: 700;
+  color: #2a1d05;
+  background: #ffd86b;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+}
+
+/* Danh sách luận giải (board) */
+.reading__list {
+  list-style: none;
+  width: 100%;
+  max-width: 660px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-12);
+}
+.reading__list-item {
+  display: flex;
+  gap: var(--spacing-16);
+  background: rgba(20, 18, 30, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-cards);
+  padding: 12px 16px;
+  text-align: left;
+}
+.reading__list-pos {
+  flex: none;
+  width: 116px;
+  color: #ffd86b;
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--text-body-sm);
+}
+.reading__list-body {
+  flex: 1;
+}
+.reading__list-hint {
+  color: rgba(255, 255, 255, 0.5);
+  font-size: var(--text-caption);
+  margin-bottom: 6px;
+}
+.reading__list .reading__card-name {
+  color: #f7f0e0;
+}
+.reading__list .reading__card-dir {
+  color: #ffce6e;
+}
+.reading__list .reading__card-text {
+  color: rgba(255, 255, 255, 0.72);
+}
+@media (max-width: 520px) {
+  .reading__list-item {
+    flex-direction: column;
+    gap: 4px;
+  }
+  .reading__list-pos {
+    width: auto;
+  }
+}
+.reading__col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+}
+/* Quầng sáng vàng toả sau mỗi lá (nổi sáng) */
+.reading__col::before {
+  content: '';
+  position: absolute;
+  top: 24px;
+  left: 50%;
+  width: 260px;
+  height: 320px;
+  transform: translateX(-50%);
+  background: radial-gradient(
+    ellipse at center,
+    rgba(255, 206, 112, 0.28),
+    rgba(255, 190, 90, 0.08) 45%,
+    transparent 72%
+  );
+  filter: blur(14px);
+  z-index: 0;
+  pointer-events: none;
+}
+.reading__col > * {
+  position: relative;
+  z-index: 1;
+}
+.reading__pos {
+  font-size: var(--text-caption);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #ffd86b;
+  margin-bottom: var(--spacing-12);
+}
+/* Sân khấu mỗi lá: nhô lên xuống (float) + bóng 3D + lấp lánh */
+.cardstage {
+  position: relative;
+  width: 180px;
+  height: 286px;
+  margin-bottom: var(--spacing-24);
+  animation: card-float 4.2s ease-in-out infinite;
+}
+.cardstage .tarot-card {
+  width: 100%;
+  height: 100%;
+  /* KHÔNG đặt filter lên .tarot-card (ép phẳng preserve-3d → vỡ lật). */
+}
+@keyframes card-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-12px);
+  }
+}
+/* Bóng 3D đổ xuống nền, co lại khi lá nhô lên */
+.cardstage__shadow {
+  position: absolute;
+  left: 50%;
+  bottom: -20px;
+  width: 130px;
+  height: 24px;
+  transform: translateX(-50%);
+  background: radial-gradient(ellipse at center, rgba(0, 0, 0, 0.55), transparent 72%);
+  filter: blur(5px);
+  animation: shadow-float 4.2s ease-in-out infinite;
+}
+@keyframes shadow-float {
+  0%,
+  100% {
+    transform: translateX(-50%) scale(1);
+    opacity: 0.55;
+  }
+  50% {
+    transform: translateX(-50%) scale(0.8);
+    opacity: 0.38;
+  }
+}
+/* Lấp lánh quanh lá */
+.sparkle {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    #fff 0%,
+    rgba(255, 224, 150, 0.85) 35%,
+    transparent 70%
+  );
+  pointer-events: none;
+  animation: sparkle-tw 2.4s ease-in-out infinite;
+}
+.sparkle--1 {
+  top: 10%;
+  right: -6px;
+  animation-delay: 0s;
+}
+.sparkle--2 {
+  top: 46%;
+  left: -8px;
+  width: 8px;
+  height: 8px;
+  animation-delay: 0.8s;
+}
+.sparkle--3 {
+  bottom: 14%;
+  right: 8%;
+  width: 9px;
+  height: 9px;
+  animation-delay: 1.5s;
+}
+@keyframes sparkle-tw {
+  0%,
+  100% {
+    transform: scale(0);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* Phần TỔNG HỢP */
+.reading__synthesis {
+  margin-top: var(--spacing-48);
+  width: 100%;
+  max-width: 720px;
+  text-align: left;
+  background: rgba(20, 18, 30, 0.62);
+  border: 1px solid rgba(255, 220, 140, 0.28);
+  border-radius: var(--radius-elevatedcards);
+  padding: var(--spacing-24);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.35),
+    inset 0 0 60px rgba(255, 200, 100, 0.04);
+}
+.reading__synthesis h2 {
+  font-family: var(--font-ppmondwest);
+  font-size: var(--text-subheading);
+  color: #ffe9a8;
+  margin-bottom: var(--spacing-12);
+}
+.reading__synthesis p {
+  color: rgba(255, 255, 255, 0.82);
+  font-size: var(--text-body-sm);
+  line-height: 1.65;
+}
+.reading__takeaways {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: var(--spacing-16);
+}
+.reading__takeaways span {
+  font-size: var(--text-caption);
+  color: #ffd86b;
+  background: rgba(255, 214, 120, 0.1);
+  border: 1px solid rgba(255, 220, 140, 0.3);
+  border-radius: var(--radius-nav);
+  padding: 3px 10px;
+}
+.reading__card-meaning {
+  background: var(--color-paper);
+  border: 1px solid var(--color-sage);
+  border-radius: var(--radius-elevatedcards);
+  box-shadow: var(--shadow-subtle-2);
+  padding: var(--spacing-16);
+  text-align: left;
+  width: 100%;
+}
+.reading__card-name {
+  font-family: var(--font-ppmondwest);
+  font-size: var(--text-subheading);
+  color: var(--color-ink);
+  margin-bottom: 4px;
+}
+.reading__card-dir {
+  font-size: var(--text-caption);
+  color: var(--color-hudson-blue);
+  margin-bottom: var(--spacing-8);
+}
+.reading__keywords {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: var(--spacing-12);
+}
+.reading__keywords span {
+  font-size: 11px;
+  background: var(--color-linen);
+  border: 1px solid var(--color-sage);
+  color: var(--color-iron);
+  border-radius: var(--radius-nav);
+  padding: 2px 9px;
+}
+.reading__card-text {
+  font-size: var(--text-body-sm);
+  line-height: 1.5;
+  color: var(--color-carbon);
+}
+.reading__actions {
+  margin-top: var(--spacing-48);
+  display: flex;
+  gap: var(--spacing-16);
+}
+
+@media (max-width: 760px) {
+  .reading__board {
+    transform: scale(0.86);
+    transform-origin: top center;
+  }
+  .carousel {
+    transform: translate(-50%, -54%) scale(0.82);
+  }
+}
+@media (max-width: 460px) {
+  .carousel {
+    transform: translate(-50%, -54%) scale(0.6);
+  }
+}

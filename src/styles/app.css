@@ -1,0 +1,179 @@
+/* ---------- Stage (vùng chứa các màn hình) ---------- */
+.stage {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  overflow: hidden;
+}
+
+/* ---------- Background ---------- */
+.bg-canvas {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+.bg-wash {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  /* Nền vũ trụ tối + quầng vàng ấm (tĩnh) */
+  background:
+    radial-gradient(1100px 820px at 76% -12%, rgba(255, 198, 96, 0.12), transparent 60%),
+    radial-gradient(900px 700px at 8% 112%, rgba(255, 170, 70, 0.08), transparent 55%),
+    radial-gradient(1400px 1000px at 50% 50%, rgba(40, 36, 60, 0.55), transparent 70%),
+    linear-gradient(180deg, #0a0913 0%, #0c0a16 45%, #07060d 100%);
+  transition: background 0.8s ease;
+}
+.bg-wash[data-phase='reading'] {
+  background:
+    radial-gradient(1000px 760px at 50% -14%, rgba(255, 205, 110, 0.16), transparent 62%),
+    linear-gradient(180deg, #0c0a16 0%, #08070f 100%);
+}
+
+/* ---------- Camera feed (nền mờ) ---------- */
+.camera-feed {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  overflow: hidden;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.6s ease;
+}
+.camera-feed[data-visible='true'] {
+  opacity: 0.14;
+}
+.camera-feed video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: scaleX(-1); /* lật gương selfie */
+  /* KHÔNG dùng filter: blur trên video toàn màn — repaint mỗi frame gây lag.
+     Giữ mờ bằng opacity của .camera-feed là đủ. */
+  filter: saturate(0.85);
+}
+
+/* ---------- Floating pill navigation ---------- */
+.pill-nav {
+  position: fixed;
+  top: var(--spacing-20);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-16);
+  background: var(--color-graphite-night);
+  color: var(--color-paper);
+  border-radius: var(--radius-nav);
+  padding: 8px 12px 8px 16px;
+  box-shadow: var(--shadow-sm);
+  max-width: calc(100vw - 32px);
+}
+.pill-nav__brand {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-8);
+  font-weight: var(--font-weight-medium);
+  font-size: var(--text-body-sm);
+  white-space: nowrap;
+}
+.pill-nav__mark {
+  width: 18px;
+  height: 18px;
+  flex: none;
+}
+.pill-nav__divider {
+  width: 1px;
+  height: 18px;
+  background: rgba(255, 255, 255, 0.18);
+}
+.pill-nav__status {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--text-caption);
+  color: rgba(255, 255, 255, 0.72);
+  white-space: nowrap;
+}
+.pill-nav__dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--color-steel);
+  flex: none;
+  transition: background 0.3s ease, box-shadow 0.3s ease;
+}
+.pill-nav__dot[data-state='ready'] {
+  background: #36c08a;
+  box-shadow: 0 0 0 3px rgba(54, 192, 138, 0.2);
+}
+.pill-nav__dot[data-state='loading'],
+.pill-nav__dot[data-state='requesting'] {
+  background: var(--color-slate-cyan);
+  animation: pulse 1.2s ease-in-out infinite;
+}
+.pill-nav__dot[data-state='denied'],
+.pill-nav__dot[data-state='error'] {
+  background: #d8654f;
+}
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 0.4;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+.pill-nav__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--text-caption);
+  color: var(--color-paper);
+  padding: 6px 10px;
+  border-radius: var(--radius-buttons);
+  transition: background 0.15s ease;
+  white-space: nowrap;
+}
+.pill-nav__btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+/* ---------- Virtual cursor ---------- */
+.virtual-cursor {
+  position: fixed;
+  z-index: 30;
+  top: 0;
+  left: 0;
+  width: 44px;
+  height: 44px;
+  margin: -22px 0 0 -22px;
+  border-radius: 50%;
+  border: 2px solid var(--color-hudson-blue);
+  background: rgba(0, 129, 192, 0.08);
+  pointer-events: none;
+  transition: width 0.12s ease, height 0.12s ease, margin 0.12s ease,
+    background 0.12s ease, border-color 0.12s ease;
+  will-change: transform;
+}
+.virtual-cursor::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--color-hudson-blue);
+}
+.virtual-cursor[data-pressed='true'] {
+  width: 30px;
+  height: 30px;
+  margin: -15px 0 0 -15px;
+  background: rgba(0, 129, 192, 0.28);
+  border-color: var(--color-slate-cyan);
+}

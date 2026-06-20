@@ -1,0 +1,120 @@
+/* ============================================================
+   Welcome screen — frosted hero card trên nền painterly
+   ============================================================ */
+.welcome {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: flex-end;
+  padding: var(--spacing-64);
+}
+@media (max-width: 760px) {
+  .welcome {
+    align-items: center;
+    justify-content: center;
+    padding: var(--spacing-24);
+  }
+}
+
+.frosted-hero {
+  position: relative;
+  max-width: 560px;
+  border-radius: var(--radius-herocards);
+  padding: var(--spacing-32);
+  background: rgba(40, 40, 52, 0.34);
+  backdrop-filter: blur(18px) saturate(1.1);
+  -webkit-backdrop-filter: blur(18px) saturate(1.1);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  box-shadow: var(--shadow-subtle-3);
+  color: var(--color-paper);
+}
+.frosted-hero__eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: var(--text-caption);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.78);
+  margin-bottom: var(--spacing-16);
+}
+.frosted-hero h1 {
+  font-family: var(--font-ppmondwest);
+  font-size: var(--text-heading-lg);
+  line-height: var(--leading-heading-lg);
+  letter-spacing: var(--tracking-heading-lg);
+  color: #fff;
+}
+.frosted-hero h1 em {
+  font-style: normal;
+  color: #cfe9f6;
+}
+.frosted-hero p {
+  margin-top: var(--spacing-16);
+  font-size: var(--text-subheading);
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.88);
+}
+.frosted-hero__actions {
+  margin-top: var(--spacing-24);
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-12);
+  align-items: center;
+}
+.frosted-hero .btn-primary {
+  background: var(--color-paper);
+  color: var(--color-ink);
+}
+.frosted-hero .btn-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #fff;
+  font-size: var(--text-body-sm);
+  font-weight: var(--font-weight-medium);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.frosted-hero__status {
+  margin-top: var(--spacing-16);
+  font-size: var(--text-caption);
+  color: rgba(255, 255, 255, 0.8);
+  min-height: 18px;
+}
+.frosted-hero__status[data-tone='error'] {
+  color: #ffc7bb;
+}
+.frosted-hero__steps {
+  margin-top: var(--spacing-24);
+  padding-top: var(--spacing-16);
+  border-top: 1px solid rgba(255, 255, 255, 0.16);
+  display: grid;
+  gap: 6px;
+}
+.frosted-hero__steps li {
+  list-style: none;
+  font-size: var(--text-caption);
+  color: rgba(255, 255, 255, 0.74);
+  display: flex;
+  gap: 8px;
+}
+.frosted-hero__steps b {
+  color: #cfe9f6;
+  font-weight: var(--font-weight-semibold);
+}
+
+/* Loading spinner nhỏ */
+.spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(255, 255, 255, 0.35);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
